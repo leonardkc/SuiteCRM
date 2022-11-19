@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suitecrm
+spec:
+  selector:
+    matchLabels:
+      app: suitecrm
+  template:
+    metadata:
+      labels:
+        app: suitecrm
+    spec:
+      containers:
+        - name: suitecrm
+          image: ginikachindulue/suitecrm-instance:v1
+          resources:
+            # requests:
+            #   cpu: "250m"
+            #   memory: "128Mi"
+            # limits:
+            #   cpu: "1000m"
+            #   memory: "512Mi"
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: suitecrm-persistent-storage
+              mountPath: /var/lib/suitecrm
+      volumes:
+        - name: suitecrm-persistent-storage
+          persistentVolumeClaim:
+            claimName: suitecrm-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: suitecrm-svc
+spec:
+  selector:
+    app: suitecrm
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 80
+      nodePort: 30300
